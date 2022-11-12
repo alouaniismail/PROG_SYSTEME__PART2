@@ -1,0 +1,55 @@
+1-Les processus et la gestion de la mémoire:
+avant:
+intro
+appels systemes
+fichiers
+now: les processus et la gestion de la mémoire + LES SIGNAUX.
+>
+si on invoque print_pid.c avec le ./a.out on aura le meme getppid() qui est l'identifiant du programme shell en cours dans le terminal de commandes.
+<=>Remarque seulement à la ressemblance de valeurs.
+Pour affichage détaillée des processus, taper:
+ps -e -o pid,ppid,command.
+L'identifiant de ce processus encadrant cette commande est le pid du processus shell en cours d'éxécution sur le terminal de commandes. Cela rejoint la remarque(*).
+L'identifiant du parent du bash représente le programme xterm dans lequel le shell s'éxécute.
+VOILA.
+On a géré 3 sections:
+Apercu des processus:
+>1/Identifiants des processus
+>2/Voir les processus actifs
+>3/Tuer un processus (kill -SIGTERM sauf si il est masqué)
+SECTION2: Créer des processus:
+******************************
+1er programme apres avoir parler de system comme fonction de stdlib.h.
+fork.c (2ieme programme)
+Rappel: id(processus_fils)>id(processus_parent) car a chaque création, cela augmente.
+rappels des sous-sections:
+1/Utiliser system
+2/Utiliser fork et exec
+2/1/Appeler fork et exec:
+voir fork_exec.c.
+2/2/Utiliser la Famille de exec
+2/3/Utiliser fork et exec
+nice -n 10 sort input.txt > output.txt signifie que le processus résultant va avoir comme indice d'ordonnacement 10 soit une valeur > 0 soit une prioriété plus faible pour le partage de ressources => technique pour qu'une opération comme celle-ci ne ralentit pas le système.
+Rq: Il faut qu'on soit en root pour attribuer a renice pour des processus en cours d'execution des prioritees d'ordonnancement <0 pour les accélerer, c'est une méthode sécuritaire pour ne pas attribuer à n'importe quel programme ~tout le temps systeme.
+(ou bien via une execution de n'importe quel utilisateur)
+C'était la partie sur:
+2/4/Ordonnacement de Processus.
+-----------------------------------------------
+SECTION3: SIGNAUX:
+rappel: pour faire un kill du processus fils depuis le parent --programme, on exécute:
+kill(child_pid,SIGTERM) en incluant les en-tetes <sys/types.h> et <signal.h>.
+rappel2: Lorsqu'un processus se termine à cause d'un signal, son code de sortie est zéro+le numéro du signal.(echo $? équivlt.)
+--------------------------------------------------------
+SECTION4: Fin de Processus:
+1/Attendre la fin d'un processus(depuis le Listing forkexec)
+2/Les appels Système wait:
+>
+voir le fichier en DETAILS: fork_exec2.c.
+3/Processus Zombies:(IMPORTANT pour la compréhension)
+cas simple: terminaison d'un fils sans que l'appel wait() depuis le parent soit fait, pas de récupération de l'état via un pointeur ce qui implique terminaison du fils sans récupération des ressources décrivant comment ca s'est termine, il devient dans la table des processus (process control block (s)!) un processus zombie.
+A RETENIR:(IMPORTANT)
+si pas appel de wait, code de statut Z et <defunct> si en cours (ps -e -o ;;;), init hérite de ces processus et libère tous les ressources les convenant, ça marche comme ceci.
+4/Libérer les ressources des fils de façon asynchrone:
+l'envoi et le traitement des signaux se fait d'une manière asynchrone, c'était juste pour rappel.
+RENVOIE IDENTIQUEMENT au fichier: sigchld.c.
+FIN.
